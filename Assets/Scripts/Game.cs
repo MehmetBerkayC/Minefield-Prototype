@@ -27,15 +27,25 @@ public class Game : MonoBehaviour
         MarkedSureOrMine = MarkedSure | Mine
     }
 
-    // Start is called before the first frame update
-    void Start()
+    Grid grid;
+
+    private void OnEnable()
     {
-        
+        grid.Initialize(rows, columns);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDisable()
     {
-        
+        grid.Dispose();
+    }
+
+    private void Update()
+    {
+        // Remake if not right or boundaries change
+        if (grid.Rows != rows || grid.Columns != columns)
+        {
+            OnDisable();
+            OnEnable();
+        }
     }
 }
