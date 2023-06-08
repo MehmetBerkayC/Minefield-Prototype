@@ -38,5 +38,16 @@ public struct GridVisualization {
         material.SetBuffer(colorsID, colorsBuffer);
     }
 
+    public void Dispose()
+    {
+        positions.Dispose();
+        colors.Dispose();
+        positionsBuffer.Release();
+        colorsBuffer.Release();
+    }
+
+    public void Draw() => Graphics.DrawMeshInstancedProcedural(
+        mesh, 0, material, new Bounds(Vector3.zero, Vector3.one), positionsBuffer.count);
+
 
 }

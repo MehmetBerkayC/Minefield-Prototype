@@ -10,6 +10,12 @@ public class Game : MonoBehaviour
     [SerializeField, Min(1)]
     int rows = 8, columns = 21;
 
+    [SerializeField]
+    Material material;
+    
+    [SerializeField]
+    Mesh mesh;
+
     [System.Flags]
     public enum CellState
     {   // Grid is hexagonal, max 6 neighbours 
@@ -28,15 +34,18 @@ public class Game : MonoBehaviour
     }
 
     Grid grid;
+    GridVisualization visualization;
 
     private void OnEnable()
     {
         grid.Initialize(rows, columns);
+        visualization.Initialize(grid, material, mesh);
     }
 
     private void OnDisable()
     {
         grid.Dispose();
+        visualization.Dispose();
     }
 
     private void Update()
@@ -47,5 +56,8 @@ public class Game : MonoBehaviour
             OnDisable();
             OnEnable();
         }
+
+        // Draw Grid
+        visualization.Draw();
     }
 }
