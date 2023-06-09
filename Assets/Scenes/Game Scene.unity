@@ -152,6 +152,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ef0d34ac1e70444eb930fe8dc281c3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minesText: {fileID: 506615046}
+  rows: 8
+  columns: 21
+  material: {fileID: 2100000, guid: 7bb42859172905e459ef4a1caaae156c, type: 2}
+  mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &22005026
 Transform:
   m_ObjectHideFlags: 0

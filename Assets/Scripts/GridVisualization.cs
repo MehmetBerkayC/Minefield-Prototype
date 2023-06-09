@@ -1,11 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-
-using static Unity.Mathematics.math;
+using Unity.Collections;
 
 public struct GridVisualization {
     static int
@@ -36,6 +32,18 @@ public struct GridVisualization {
         colorsBuffer = new ComputeBuffer(instanceCount, 3 * 4);
         material.SetBuffer(positionsID, positionsBuffer);
         material.SetBuffer(colorsID, colorsBuffer);
+
+        new InitializeVisualizationJob
+        {
+            positions = positions,
+            colors = colors,
+            rows = grid.Rows,
+            columns = grid.Columns
+        }.ScheduleParallel(grid.CellCount,
+                           grid.Columns,
+                           default).Complete();
+        positionsBuffer.SetData(positions);
+        colorsBuffer.SetData(colors);
     }
 
     public void Dispose()
