@@ -18,13 +18,18 @@ public struct GridVisualization {
 
     Mesh mesh;
 
+    public const int
+        rowsPerCell = 7,
+        columnsPerCell = 5,
+        blocksPerCell = rowsPerCell * columnsPerCell;
+
     public void Initialize(Grid grid, Material material, Mesh mesh)
     {
         this.grid = grid;
         this.material = material;
         this.mesh = mesh;
 
-        int instanceCount = grid.CellCount;
+        int instanceCount = grid.CellCount * blocksPerCell;
         positions = new NativeArray<float3>(instanceCount, Allocator.Persistent);
         colors = new NativeArray<float3>(instanceCount, Allocator.Persistent);
 
