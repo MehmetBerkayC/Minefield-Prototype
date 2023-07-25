@@ -42,4 +42,16 @@ public struct Grid {
         index = valid ? GetCellIndex(row, column) : -1;
         return valid;
     }
+    public void GetRowColumn (int index, out int row, out int column)
+	{
+		row = index / Columns;
+		column = index - row * Columns;
+	}
+
+    public void PlaceMines(int mines) => new PlaceMinesJob
+    {
+        grid = this,
+        mines = mines,
+        seed = Random.Range(1, int.MaxValue)
+    }.Schedule().Complete();
 }
