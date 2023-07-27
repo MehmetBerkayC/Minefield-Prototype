@@ -10,13 +10,15 @@ public struct GridVisualization {
 
     ComputeBuffer positionsBuffer, colorsBuffer;
 
-    NativeArray<float3> positions, colors;
+    NativeArray<float3> positions, colors, ripples;
 
     Grid grid;
 
     Material material;
 
     Mesh mesh;
+
+    int rippleCount;
 
     public const int
         rowsPerCell = 7,
@@ -32,6 +34,8 @@ public struct GridVisualization {
         int instanceCount = grid.CellCount * blocksPerCell;
         positions = new NativeArray<float3>(instanceCount, Allocator.Persistent);
         colors = new NativeArray<float3>(instanceCount, Allocator.Persistent);
+        ripples = new NativeArray<float3>(10, Allocator.Persistent);
+        rippleCount = 0;
 
         positionsBuffer = new ComputeBuffer(instanceCount, 3 * 4);
         colorsBuffer = new ComputeBuffer(instanceCount, 3 * 4);
@@ -65,17 +69,41 @@ public struct GridVisualization {
         z += (grid.Rows - 1) * 0.5f + (c & 1) * 0.5f - 0.25f;
         int r = Mathf.FloorToInt(z);
 
-        return grid.TryGetCellIndex(r, c, out cellIndex) &&
+        bool valid = grid.TryGetCellIndex(r, c, out cellIndex) &&
                 x - c > 1f / (columnsPerCell + 1) &&
                 z - r > 1f / (rowsPerCell + 1);
+
+        if(valid && rippleCount < ripples.Length)
+        {
+            ripples[rippleCount++] = new float3(p.x, p.z, 0f);
+        }
+        return valid;
     }
 
     public void Update()
     {
+        float dt = Time.deltaTime;
+        for (int i = 0; i < rippleCount; i++)
+        {
+            float3 ripple = ripples[i];
+            if (ripple.z < 1f)
+            {
+                ripple.z = Mathf.Min(ripple.z + dt, 1f);
+                ripples[i] = ripple;
+            }
+            else
+            {
+                ripples[i] = ripples[--rippleCount];
+                i -= 1;
+            }
+        }
+
         new UpdateVisualizationJob
         {
             positions = positions,
             colors = colors,
+            ripples = ripples,
+            rippleCount = rippleCount,
             grid = grid
         }.ScheduleParallel(grid.CellCount, grid.Columns, default).Complete();
         positionsBuffer.SetData(positions);
@@ -86,12 +114,19 @@ public struct GridVisualization {
     {
         positions.Dispose();
         colors.Dispose();
+        ripples.Dispose();
         positionsBuffer.Release();
         colorsBuffer.Release();
     }
 
-    public void Draw() => Graphics.DrawMeshInstancedProcedural(
+    public void Draw()
+    {
+        if (rippleCount > 0)
+        {
+            Update();
+        }
+        Graphics.DrawMeshInstancedProcedural(
         mesh, 0, material, new Bounds(Vector3.zero, Vector3.one), positionsBuffer.count);
-
+    }
 
 }

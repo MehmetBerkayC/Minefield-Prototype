@@ -11,10 +11,12 @@ using static Game;
 struct UpdateVisualizationJob : IJobFor
 {
     [NativeDisableParallelForRestriction]
-    public NativeArray<float3> positions, colors;
+    public NativeArray<float3> positions, colors, ripples;
 
     [ReadOnly]
     public Grid grid;
+
+	public int rippleCount;
 
     readonly static ulong[] bitmaps =
     {
@@ -75,10 +77,27 @@ struct UpdateVisualizationJob : IJobFor
         {
             bool altered = (bitmap & ((ulong)1 << bi)) != 0;
 
-            float3 position = positions[blockOffset + bi];
-            position.y = altered ? 0.5f : 0f;
-            positions[blockOffset + bi] = position;
-            colors[blockOffset + bi] = altered ? coloration : 0.5f;
-        }
+			float3 position = positions[blockOffset + bi];
+			float ripples = AccumulateRipples(position);
+			position.y = (altered ? 0.5f : 0f) - 0.5f * ripples;
+			positions[blockOffset + bi] = position;
+			colors[blockOffset + bi] =
+				(altered ? coloration : 0.5f) * (1f - 0.05f * ripples);
+		}
     }
+
+	float AccumulateRipples(float3 position)
+	{
+		float sum = 0f;
+		for (int r = 0; r < rippleCount; r++)
+		{
+			float3 ripple = ripples[r];
+			float d = 50f * ripple.z - distance(position.xz, ripple.xy);
+			if (0 < d && d < 10f)
+			{
+				sum += (1f - cos(d * 2f * PI / 10f)) * (1f - ripple.z * ripple.z);
+			}
+		}
+		return sum;
+	}
 }

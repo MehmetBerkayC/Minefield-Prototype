@@ -155,7 +155,7 @@ MonoBehaviour:
   minesText: {fileID: 506615046}
   rows: 8
   columns: 21
-  mines: 15
+  mines: 30
   material: {fileID: 2100000, guid: 7bb42859172905e459ef4a1caaae156c, type: 2}
   mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &22005026

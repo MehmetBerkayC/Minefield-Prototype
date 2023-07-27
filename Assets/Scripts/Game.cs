@@ -44,17 +44,23 @@ public class Game : MonoBehaviour
     {
         grid.Initialize(rows, columns);
         visualization.Initialize(grid, material, mesh);
-        StartNewGame();
+        StartGame();
     }
 
-    private void StartNewGame()
+    IEnumerator StartNewGame()
+    {
+        yield return new WaitForSeconds(3f);
+        StartGame();
+    }
+
+    private void StartGame()
     {
         isGameOver = false;
-
         mines = Mathf.Min(mines, grid.CellCount);
         minesText.SetText("{0}", mines);
         markedSureCount = 0;
         grid.PlaceMines(mines);
+        visualization.Update();
     }
 
     private void OnDisable()
@@ -72,15 +78,11 @@ public class Game : MonoBehaviour
             OnEnable();
         }
 
-        // Draw Grid
-        
-        if (PerformAction())
-        {
-            visualization.Update();
-        }
+        // Draw Grid and take Input
+        PerformAction();
         visualization.Draw();
     }
-    bool PerformAction()
+    void PerformAction()
     {
         bool revealAction = Input.GetMouseButton(0);
         bool markAction = Input.GetMouseButtonDown(1);
@@ -91,19 +93,26 @@ public class Game : MonoBehaviour
         {
             if (isGameOver)
             {
-                StartNewGame();
+                StartCoroutine("StartNewGame");
             }
-            return revealAction ? DoRevealAction(cellIndex) : DoMarkAction(cellIndex);
+            
+            if (revealAction)
+            {
+                DoRevealAction(cellIndex);
+            }
+            else 
+            {
+                DoMarkAction(cellIndex); 
+            }
         }
-        return false;
     }
 
-    bool DoMarkAction(int cellIndex)
+    void DoMarkAction(int cellIndex)
     {
         CellState state = grid[cellIndex];
         if (state.Is(CellState.Revealed))
         {
-            return false;
+            return;
         }
 
         if (state.IsNot(CellState.Marked))
@@ -123,14 +132,13 @@ public class Game : MonoBehaviour
         }
 
         minesText.SetText("{0}", mines - markedSureCount);
-        return true;
     }
-    bool DoRevealAction(int cellIndex)
+    void DoRevealAction(int cellIndex)
     {
         CellState state = grid[cellIndex];
         if (state.Is(CellState.MarkedOrRevealed))
         {
-            return false;
+            return;
         }
 
         grid.Reveal(cellIndex);
@@ -145,6 +153,5 @@ public class Game : MonoBehaviour
             isGameOver = true;
             minesText.SetText("Game Won");
         }
-        return true;
     }
 }
