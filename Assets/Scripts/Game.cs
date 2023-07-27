@@ -20,9 +20,9 @@ public class Game : MonoBehaviour
     public enum CellState
     {   // Grid is hexagonal, max 6 neighbours 
         Zero, One, Two, Three, Four, Five, Six,
-        // store this information in the unused bits of CellState.   |
-        // Values up to six require three bits,                      |
-        // so we can use the fourth bit as a flag to indicate a mine V
+        // store this information in the unused bits of CellState.      |
+        // Values up to six require three bits,                         |
+        // so we can use the fourth bit as a flag to indicate a mine... V
         Mine = 1 << 3,
         MarkedSure = 1 << 4,
         MarkedUnsure = 1 << 5,
@@ -38,10 +38,19 @@ public class Game : MonoBehaviour
 
     int markedSureCount;
 
+    bool isGameOver;
+
     private void OnEnable()
     {
         grid.Initialize(rows, columns);
         visualization.Initialize(grid, material, mesh);
+        StartNewGame();
+    }
+
+    private void StartNewGame()
+    {
+        isGameOver = false;
+
         mines = Mathf.Min(mines, grid.CellCount);
         minesText.SetText("{0}", mines);
         markedSureCount = 0;
@@ -80,6 +89,10 @@ public class Game : MonoBehaviour
             && visualization.TryGetHitCellIndex(
                 Camera.main.ScreenPointToRay(Input.mousePosition), out int cellIndex))
         {
+            if (isGameOver)
+            {
+                StartNewGame();
+            }
             return revealAction ? DoRevealAction(cellIndex) : DoMarkAction(cellIndex);
         }
         return false;
@@ -120,7 +133,13 @@ public class Game : MonoBehaviour
             return false;
         }
 
-        grid[cellIndex] = state.With(CellState.Revealed);
+        grid.Reveal(cellIndex);
+        if (state.Is(CellState.Mine))
+        {
+            isGameOver = true;
+            minesText.SetText("Game Over");
+            grid.RevealMinesAndMistakes();
+        }
         return true;
     }
 }

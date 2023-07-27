@@ -29,6 +29,7 @@ struct PlaceMinesJob : IJob
         for (int m = 0; m < mines; m++)
         {
             int candidateIndex = random.NextInt(candidateCount--);
+            SetMine(candidates[candidateIndex]);
             candidates[candidateIndex] = candidates[candidateCount];
         }
     }
