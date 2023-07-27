@@ -140,6 +140,11 @@ public class Game : MonoBehaviour
             minesText.SetText("Game Over");
             grid.RevealMinesAndMistakes();
         }
+        else if (grid.HiddenCellCount == mines)
+        {
+            isGameOver = true;
+            minesText.SetText("Game Won");
+        }
         return true;
     }
 }

@@ -14,6 +14,7 @@ struct PlaceMinesJob : IJob
 
     public void Execute()
     {
+        grid.RevealedCellCount = 0;
         int candidateCount = grid.CellCount;
         var candidates = 
             new NativeArray<int>(candidateCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);

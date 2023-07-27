@@ -46,6 +46,7 @@ struct RevealRegionJob : IJob
                 {
                     stack[stackSize++] = rc;
                 }
+                grid.RevealedCellCount += 1;
                 grid[i] = state.With(CellState.Revealed);
             }
         }

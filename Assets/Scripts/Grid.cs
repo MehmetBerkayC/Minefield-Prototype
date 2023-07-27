@@ -13,6 +13,16 @@ public struct Grid {
 
     public int CellCount => states.Length;
 
+    public int HiddenCellCount => CellCount - RevealedCellCount;
+
+    public int RevealedCellCount
+    {
+        get => revealedCellCount[0];
+        set => revealedCellCount[0] = value;
+    }
+
+    NativeArray<int> revealedCellCount;
+
     //A NativeArray is really just a wrapper that points at an array in the "native" code
     //(inside the unity engine itself outside of the mono runtime).
     //And that array is technically in a completely different part of memory...
@@ -23,11 +33,15 @@ public struct Grid {
     {
         Rows = rows;
         Columns = columns;
+        revealedCellCount = new NativeArray<int>(1, Allocator.Persistent);
         states = new NativeArray<CellState>(Rows * Columns, Allocator.Persistent);
     }
 
-    public void Dispose() => states.Dispose();    
-
+    public void Dispose()
+    {
+        revealedCellCount.Dispose();
+        states.Dispose();
+    }
     public CellState this[int i]
     {
         get => states[i];
